@@ -17,17 +17,6 @@ package com.loopfor.zookeeper
 
 import org.apache.zookeeper.data.Stat
 
-/**
- * The ''status'' of a ZooKeeper node.
- * 
- * Each modification to ZooKeeper is stamped with a monotonically-increasing sequence number, known as a ''transaction id'' or
- * ''zxid'', which conveys a total ordering of all changes. Thus, given any two changes, A and B, denoted by transaction ids,
- * `zxid,,A,,` and `zxid,,B,,`, respectively, A is said to ''happen before'' B if `zxid,,A,,` < `zxid,,B,,`. Note that the
- * ''transaction id'' is scoped to the entire ZooKeeper repository, not to individual nodes.
- * 
- * In addition to stamping all repository changes with a transaction id, which establishes total order, each modification to a
- * given node also causes some ''version'' of that node to increment.
- */
 trait Status {
   /**
    * Returns the path of this node.
