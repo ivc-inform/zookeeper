@@ -167,7 +167,7 @@ trait Node {
 object Node {
   def apply(path: String)(implicit zk: Zookeeper): Node = apply(Path(path))(zk)
 
-  def apply(path: Path)(implicit zk: Zookeeper): Node = new Impl(zk.sync, path.normalize)
+  def apply(path: Path)(implicit zk: Zookeeper): Node = new Impl(zk.syncZookeeper, path.normalize)
 
   def unapply(node: Node): Option[Path] =
     if (node == null) None else Some(node.nodePath)

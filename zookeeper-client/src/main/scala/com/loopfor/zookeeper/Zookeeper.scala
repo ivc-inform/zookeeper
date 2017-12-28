@@ -21,43 +21,43 @@ trait Zookeeper {
    * 
    * @return a synchronous view of this client
    */
-  def sync: SynchronousZookeeper
+  def syncZookeeper: SynchronousZookeeper
 
   /**
    * Returns a view of this client in which operations are performed ''asynchronously''.
-   * 
+   *
    * @return an asynchronous view of this client
    */
-  def async: AsynchronousZookeeper
+  def asyncZookeeper: AsynchronousZookeeper
 
   /**
    * Ensures that the value of a node, specified by the given path, is synchronized across the ZooKeeper cluster.
-   * 
+   *
    * '''An important note on consistency''': ZooKeeper does not guarantee, for any given point in time, that all clients will
    * have a consistent view of the cluster. Since reads can be served by any node in the cluster, whereas writes are serialized
    * through the leader, there exists the possibility in which two separate clients may have inconsistent views. This scenario
    * occurs when the leader commits a change once consensus is reached, but the change has not yet propagated across the
    * cluster. Therefore, reads occurring before the commit has propagated will be globally inconsistent. This behavior is
    * normally acceptable, but for some use cases, writes may need to be globally visible before subsequent reads occur.
-   * 
+   *
    * This method is particularly useful when a ''write'' occurring in one process is followed by a ''read'' in another process.
    * For example, consider the following sequence of operations:
-   * 
+   *
    *  - process A writes a value
    *  - process A sends a message to process B
    *  - process B reads the value
-   * 
+   *
    * The assumption is that process B expects to see the value written by process A, but as mentioned, ZooKeeper does not make
    * this guarantee. A call to this method before process B attempts to read the value ensures that all prior writes are
    * consistently applied across the cluster, thus observing the write in process A.
-   * 
+   *
    * @return a future that completes when the node is synchronized across the cluster
    */
-  def ensure(path: String): Future[Unit]
+  def sync(path: String): Future[Unit]
 
   /**
    * Closes the client connection to the ZooKeeper cluster.
-   * 
+   *
    * A consequence of closing the connection is that ZooKeeper will expire the corresponding session, which further implies
    * that all ephemeral nodes created by this client will be deleted.
    */
@@ -70,10 +70,10 @@ trait Zookeeper {
 trait SynchronousZookeeper extends Zookeeper {
   /**
    * Creates a new node at the given path.
-   * 
+   *
    * If a ''sequential'' [[Disposition disposition]] is provided in `disp`, then `path` is appended with a monotonically
    * increasing sequence, thus guaranteeing that all sequential nodes are unique with `path` as their prefix.
-   * 
+   *
    * @param path the path of the node to create
    * @param data the data to associate with the node, which may be empty, but not `null`
    * @param acl an access control list to apply to the node, which must not be empty
@@ -85,10 +85,10 @@ trait SynchronousZookeeper extends Zookeeper {
 
   /**
    * Deletes the node specified by the given path.
-   * 
+   *
    * @param path the path of the node
    * @param version a `Some` containing the expected version of the node or `None` if a version match is not required
-   * 
+   *
    * @throws NoNodeException if the node does not exist
    * @throws BadVersionException if `version` is specified and does not match the node version
    * @throws NotEmptyException if the node contains children
@@ -97,22 +97,22 @@ trait SynchronousZookeeper extends Zookeeper {
 
   /**
    * Returns the data and status of the node specified by the given path.
-   * 
+   *
    * @param path the path of the node
    * @return a tuple containing the data and status of the node
-   * 
+   *
    * @throws NoNodeException if the node does not exist
    */
   def get(path: String): (Array[Byte], Status)
 
   /**
    * Sets the data for the node specified by the given path.
-   * 
+   *
    * @param path the path of the node
    * @param data the data to associate with the node, which may be empty, but not `null`
    * @param version a `Some` containing the expected version of the node or `None` if a version match is not required
    * @return the status of the node
-   * 
+   *
    * @throws NoNodeException if the node does not exist
    * @throws BadVersionException if `version` is specified and does not match the node version
    */
@@ -120,7 +120,7 @@ trait SynchronousZookeeper extends Zookeeper {
 
   /**
    * Returns the status of the node specified by the given path if it exists.
-   * 
+   *
    * @param path the path of the node
    * @return a `Some` containing the node status or `None` if the node does not exist
    */
@@ -128,32 +128,32 @@ trait SynchronousZookeeper extends Zookeeper {
 
   /**
    * Returns the children of the node specified by the given path.
-   * 
+   *
    * @param path the path of the node
    * @return an unordered sequence containing the names of each child node
-   * 
+   *
    * @throws NoNodeException if the node does not exist
    */
   def children(path: String): Seq[String]
 
   /**
    * Returns the ACL and status of the node specified by the given path.
-   * 
+   *
    * @param path the path of the node
    * @return a tuple containing the ACL and status of the node
-   * 
+   *
    * @throws NoNodeException if the node does not exist
    */
   def getACL(path: String): (Seq[ACL], Status)
 
   /**
    * Sets the ACL for the node specified by the given path.
-   * 
+   *
    * @param path the path of the node
    * @param acl an access control list to apply to the node, which must not be empty
    * @param version a `Some` containing the expected version of the node or `None` if a version match is not required
    * @return the status of the node
-   * 
+   *
    * @throws NoNodeException if the node does not exist
    * @throws BadVersionException if `version` is specified and does not match the node version
    */
@@ -161,10 +161,10 @@ trait SynchronousZookeeper extends Zookeeper {
 
   /**
    * Returns a synchronous client in which operations implicitly attach the specified watch function.
-   * 
+   *
    * The partial function `fn` is invoked when a watch is triggered or the session state changes. This method is typically
    * used in a transient manner to introduce a watch function prior to performing a watchable ZooKeeper operation.
-   * 
+   *
    * Example:
    * {{{
    * val zk = SynchronousZookeeper(config)
@@ -178,11 +178,11 @@ trait SynchronousZookeeper extends Zookeeper {
 
   /**
    * Atomically performs a set of operations, either committing all or none.
-   * 
+   *
    * The set of operations are applied by ZooKeeper in sequential order. If successful, this method returns a `Right`
    * containing a sequence of results that positionally correlate to the sequence of operations. Otherwise, it returns a
    * `Left` similarly containing a sequence of problems.
-   * 
+   *
    * Example:
    * {{{
    * val ops = CheckOperation("/foo", None) ::
@@ -202,28 +202,28 @@ trait SynchronousZookeeper extends Zookeeper {
 trait SynchronousWatchableZookeeper extends Zookeeper {
   /**
    * Returns the data and status of the node specified by the given path and additionally sets a watch for any changes.
-   * 
+   *
    * The watch is triggered when one of the following conditions occur:
    *  - the data associated with the node changes
    *  - the node is deleted
    *  - the session state changes
-   * 
+   *
    * @param path the path of the node
    * @return a tuple containing the data and status of the node
-   * 
+   *
    * @throws NoNodeException if the node does not exist
    */
   def get(path: String): (Array[Byte], Status)
 
   /**
    * Returns the status of the node specified by the given path if it exists and additionally sets a watch for any changes.
-   * 
+   *
    * The watch is triggered when one of the following conditions occur:
    *  - the data associated with the node changes
    *  - the node is created
    *  - the node is deleted
    *  - the session state changes
-   * 
+   *
    * @param path the path of the node
    * @return a `Some` containing the node status or `None` if the node does not exist
    */
@@ -231,13 +231,13 @@ trait SynchronousWatchableZookeeper extends Zookeeper {
 
   /**
    * Returns the children of the node specified by the given path and additionally sets a watch for any changes.
-   * 
+   *
    * The watch is triggered when one of the following conditions occur:
    *  - the session state changes
-   * 
+   *
    * @param path the path of the node
    * @return an unordered sequence containing the names of each child node
-   * 
+   *
    * @throws NoNodeException if the node does not exist
    */
   def children(path: String): Seq[String]
@@ -249,10 +249,10 @@ trait SynchronousWatchableZookeeper extends Zookeeper {
 trait AsynchronousZookeeper extends Zookeeper {
   /**
    * Asynchronously creates a new node at the given path.
-   * 
+   *
    * If a ''sequential'' [[Disposition disposition]] is provided in `disp`, then `path` is appended with a monotonically
    * increasing sequence, thus guaranteeing that all sequential nodes are unique with `path` as their prefix.
-   * 
+   *
    * @param path the path of the node to create
    * @param data the data to associate with the node, which may be empty, but not `null`
    * @param acl an access control list to apply to the node, which must not be empty
@@ -264,7 +264,7 @@ trait AsynchronousZookeeper extends Zookeeper {
 
   /**
    * Asynchronously deletes the node specified by the given path.
-   * 
+   *
    * @param path the path of the node
    * @param version a `Some` containing the expected version of the node or `None` if a version match is not required
    * @return a future, which upon success, yields `Unit`, otherwise one of the following exceptions:
@@ -276,7 +276,7 @@ trait AsynchronousZookeeper extends Zookeeper {
 
   /**
    * Asynchronously gets the data and status of the node specified by the given path.
-   * 
+   *
    * @param path the path of the node
    * @return a future, which upon success, yeilds a tuple containing the data and status of the node, otherwise one of the
    * following exceptions:
@@ -286,7 +286,7 @@ trait AsynchronousZookeeper extends Zookeeper {
 
   /**
    * Asynchronously sets the data for the node specified by the given path.
-   * 
+   *
    * @param path the path of the node
    * @param data the data to associate with the node, which may be empty, but not `null`
    * @param version a `Some` containing the expected version of the node or `None` if a version match is not required
@@ -298,7 +298,7 @@ trait AsynchronousZookeeper extends Zookeeper {
 
   /**
    * Asynchronously determines the status of the node specified by the given path if it exists.
-   * 
+   *
    * @param path the path of the node
    * @return a future yielding a `Some` containing the node status or `None` if the node does not exist
    */
@@ -306,7 +306,7 @@ trait AsynchronousZookeeper extends Zookeeper {
 
   /**
    * Asynchronously gets the children of the node specified by the given path.
-   * 
+   *
    * @param path the path of the node
    * @return a future, which upon success, yields an unordered sequence containing the names of each child node, otherwise one
    * of the following exceptions:
@@ -316,7 +316,7 @@ trait AsynchronousZookeeper extends Zookeeper {
 
   /**
    * Asynchronously gets the ACL and status of the node specified by the given path.
-   * 
+   *
    * @param path the path of the node
    * @return a future, which upon success, yields a tuple containing the ACL and status of the node, otherwise one of the
    * following exceptions:
@@ -326,7 +326,7 @@ trait AsynchronousZookeeper extends Zookeeper {
 
   /**
    * Asynchronously sets the ACL for the node specified by the given path.
-   * 
+   *
    * @param path the path of the node
    * @param acl an access control list to apply to the node, which must not be empty
    * @param version a `Some` containing the expected version of the node or `None` if a version match is not required
@@ -338,10 +338,10 @@ trait AsynchronousZookeeper extends Zookeeper {
 
   /**
    * Returns an asynchronous client in which operations implicitly attach the specified watch function.
-   * 
+   *
    * The partial function `fn` is invoked when a watch is triggered or the session state changes. This method is typically
    * used in a transient manner to introduce a watch function prior to performing a watchable ZooKeeper operation.
-   * 
+   *
    * Example:
    * {{{
    * val zk = AsynchronousZookeeper(config)
@@ -368,12 +368,12 @@ trait AsynchronousWatchableZookeeper extends Zookeeper {
   /**
    * Asynchronously gets the data and status of the node specified by the given path and additionally sets a watch for any
    * changes.
-   * 
+   *
    * The watch is triggered when one of the following conditions occur:
    *  - the data associated with the node changes
    *  - the node is deleted
    *  - the session state changes
-   * 
+   *
    * @param path the path of the node
    * @return a future, which upon success, yields a tuple containing the data and status of the node, otherwise one of the
    * following exceptions:
@@ -384,13 +384,13 @@ trait AsynchronousWatchableZookeeper extends Zookeeper {
   /**
    * Asynchronously determines the status of the node specified by the given path if it exists and additionally sets a watch
    * for any changes.
-   * 
+   *
    * The watch is triggered when one of the following conditions occur:
    *  - the data associated with the node changes
    *  - the node is created
    *  - the node is deleted
    *  - the session state changes
-   * 
+   *
    * @param path the path of the node
    * @return a future yielding a `Some` containing the node status or `None` if the node does not exist
    */
@@ -398,10 +398,10 @@ trait AsynchronousWatchableZookeeper extends Zookeeper {
 
   /**
    * Asynchronously gets the children of the node specified by the given path and additionally sets a watch for any changes.
-   * 
+   *
    * The watch is triggered when one of the following conditions occur:
    *  - the session state changes
-   * 
+   *
    * @param path the path of the node
    * @return a future, which upon success, yields an unordered sequence containing the names of each child node, otherwise
    * one of the following exceptions:
@@ -413,11 +413,11 @@ trait AsynchronousWatchableZookeeper extends Zookeeper {
 private class BaseZK(zk: ZooKeeper, exec: ExecutionContext) extends Zookeeper {
   private implicit val _exec = exec
 
-  def sync: SynchronousZookeeper = new SynchronousZK(zk, exec)
+  def syncZookeeper: SynchronousZookeeper = new SynchronousZK(zk, exec)
 
-  def async: AsynchronousZookeeper = new AsynchronousZK(zk, exec)
+  def asyncZookeeper: AsynchronousZookeeper = new AsynchronousZK(zk, exec)
 
-  def ensure(path: String): Future[Unit] = {
+  def sync(path: String): Future[Unit] = {
     val p = Promise[Unit]
     zk.sync(path, VoidHandler(p), null)
     p.future
@@ -693,7 +693,7 @@ private object ExistsHandler {
 object Zookeeper {
   /**
    * Constructs a new ZooKeeper client using the given configuration.
-   * 
+   *
    * @param config the client configuration
    * @return a client with the given `config`
    */
@@ -701,7 +701,7 @@ object Zookeeper {
 
   /**
    * Constructs a new ZooKeeper client using the given configuration and session credential.
-   * 
+   *
    * @param config the client configuration
    * @param cred the session credentials
    * @return a client with the given `config` and `cred`
@@ -751,58 +751,58 @@ object Zookeeper {
 
 /**
  * Constructs [[SynchronousZookeeper]] values.
- * 
+ *
  * This companion object is provided as a convenience and is equivalent to:
  * {{{
  * Zookeeper(...).sync
  * }}}
- * 
+ *
  * @see [[Zookeeper]]
  */
 object SynchronousZookeeper {
   /**
    * Constructs a new synchronous ZooKeeper client using the given configuration.
-   * 
+   *
    * @param config the client configuration
    * @return a client with the given `config`
    */
-  def apply(config: Configuration): SynchronousZookeeper = Zookeeper(config).sync
+  def apply(config: Configuration): SynchronousZookeeper = Zookeeper(config).syncZookeeper
 
   /**
    * Constructs a new synchronous ZooKeeper client using the given configuration and session credential.
-   * 
+   *
    * @param config the client configuration
    * @param cred the session credentials
    * @return a client with the given `config` and `cred`
    */
-  def apply(config: Configuration, cred: Credential): SynchronousZookeeper = Zookeeper(config, cred).sync
+  def apply(config: Configuration, cred: Credential): SynchronousZookeeper = Zookeeper(config, cred).syncZookeeper
 }
 
 /**
  * Constructs [[AsynchronousZookeeper]] values.
- * 
+ *
  * This companion object is provided as a convenience and is equivalent to:
  * {{{
  * Zookeeper(...).async
  * }}}
- * 
+ *
  * @see [[Zookeeper]]
  */
 object AsynchronousZookeeper {
   /**
    * Constructs a new asynchronous ZooKeeper client using the given configuration.
-   * 
+   *
    * @param config the client configuration
    * @return a client with the given `config`
    */
-  def apply(config: Configuration): AsynchronousZookeeper = Zookeeper(config).async
+  def apply(config: Configuration): AsynchronousZookeeper = Zookeeper(config).asyncZookeeper
 
   /**
    * Constructs a new asynchronous ZooKeeper client using the given configuration and session credential.
-   * 
+   *
    * @param config the client configuration
    * @param cred the session credentials
    * @return a client with the given `config` and `cred`
    */
-  def apply(config: Configuration, cred: Credential): AsynchronousZookeeper = Zookeeper(config, cred).async
+  def apply(config: Configuration, cred: Credential): AsynchronousZookeeper = Zookeeper(config, cred).asyncZookeeper
 }
