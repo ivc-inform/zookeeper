@@ -18,7 +18,6 @@ package com.loopfor.zookeeper
 import org.apache.zookeeper.server.ZooKeeperServer
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.fixture.FunSuite
-import java.util.UUID
 
 abstract class ZookeeperSuite extends FunSuite with BeforeAndAfterAll {
   type FixtureParam = Path

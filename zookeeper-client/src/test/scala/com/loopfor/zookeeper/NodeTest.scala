@@ -20,6 +20,7 @@ import scala.language._
 
 class NodeTest extends ZookeeperSuite {
   test("normalized path when constructing node") { root =>
+    val a: String = root
     val tests = Seq(
           ("", ""),
           ("/", "/"),
