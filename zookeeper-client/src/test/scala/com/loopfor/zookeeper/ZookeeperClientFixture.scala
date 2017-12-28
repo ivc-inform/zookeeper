@@ -21,8 +21,8 @@ object ZookeeperClientFixture {
     def apply(port: Int): ZookeeperClient = {
         val config = ConfigurationZookeeperClient(("localhost", port) :: Nil).withWatcher(
                 (state: StateEvent, session: Session) ⇒ {
-                    println(state)
-                    println(session)
+                    println(s"state: $state")
+                    println(s"session: $session")
                 }
         )
         ZookeeperClient(config)
