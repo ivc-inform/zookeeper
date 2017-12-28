@@ -23,15 +23,15 @@ abstract class ZookeeperSuite extends FunSuite with BeforeAndAfterAll {
   type FixtureParam = Path
 
   private val server: ZooKeeperServer = ServerFixture()
-  implicit val zk: Zookeeper = ClientFixture(server.getClientPort)
+  implicit val zooKeeper: ZookeeperClient = ZookeeperClientFixture(server.getClientPort)
 
   override protected def afterAll {
-    zk.close()
+    zooKeeper.close()
     server.shutdown()
   }
 
   override protected def withFixture(test: OneArgTest) = {
-    val root: String = zk.syncZookeeper.create("/test_", Array(), ACL.AnyoneAll, PersistentSequential)
+    val root: String = zooKeeper.syncZookeeper.create("/test_", Array(), ACL.AnyoneAll, PersistentSequential)
     super.withFixture(test.toNoArgTest(Path(root)))
   }
 }

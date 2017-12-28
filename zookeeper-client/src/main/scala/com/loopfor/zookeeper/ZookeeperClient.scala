@@ -15,13 +15,13 @@ import scala.language._
 /**
  * An instance of a ZooKeeper client.
  */
-trait Zookeeper {
+trait ZookeeperClient {
   /**
    * Returns a view of this client in which operations are performed ''synchronously''.
-   * 
+   *
    * @return a synchronous view of this client
    */
-  def syncZookeeper: SynchronousZookeeper
+  def syncZookeeper: SynchronousZookeeperClient
 
   /**
    * Returns a view of this client in which operations are performed ''asynchronously''.
@@ -67,7 +67,7 @@ trait Zookeeper {
 /**
  * A ZooKeeper client with ''synchronous'' operations.
  */
-trait SynchronousZookeeper extends Zookeeper {
+trait SynchronousZookeeperClient extends ZookeeperClient {
   /**
    * Creates a new node at the given path.
    *
@@ -174,7 +174,7 @@ trait SynchronousZookeeper extends Zookeeper {
    * } get "/foo"
    * }}}
    */
-  def watch(fn: PartialFunction[Event, Unit]): SynchronousWatchableZookeeper
+  def watch(fn: PartialFunction[Event, Unit]): SynchronousWatchableZookeeperClient
 
   /**
    * Atomically performs a set of operations, either committing all or none.
@@ -199,7 +199,7 @@ trait SynchronousZookeeper extends Zookeeper {
 /**
  * A ZooKeeper client with ''synchronous'' and ''watchable'' operations.
  */
-trait SynchronousWatchableZookeeper extends Zookeeper {
+trait SynchronousWatchableZookeeperClient extends ZookeeperClient {
   /**
    * Returns the data and status of the node specified by the given path and additionally sets a watch for any changes.
    *
@@ -246,7 +246,7 @@ trait SynchronousWatchableZookeeper extends Zookeeper {
 /**
  * A ZooKeeper client with ''asynchronous'' operations.
  */
-trait AsynchronousZookeeper extends Zookeeper {
+trait AsynchronousZookeeper extends ZookeeperClient {
   /**
    * Asynchronously creates a new node at the given path.
    *
@@ -364,7 +364,7 @@ trait AsynchronousZookeeper extends Zookeeper {
 /**
  * A ZooKeeper client with ''asynchronous'' and ''watchable'' operations.
  */
-trait AsynchronousWatchableZookeeper extends Zookeeper {
+trait AsynchronousWatchableZookeeper extends ZookeeperClient {
   /**
    * Asynchronously gets the data and status of the node specified by the given path and additionally sets a watch for any
    * changes.
@@ -410,10 +410,10 @@ trait AsynchronousWatchableZookeeper extends Zookeeper {
   def children(path: String): Future[(Seq[String], Status)]
 }
 
-private class BaseZK(zk: ZooKeeper, exec: ExecutionContext) extends Zookeeper {
+private class BaseZK(zk: ZooKeeper, exec: ExecutionContext) extends ZookeeperClient {
   private implicit val _exec = exec
 
-  def syncZookeeper: SynchronousZookeeper = new SynchronousZK(zk, exec)
+  def syncZookeeper: SynchronousZookeeperClient = new SynchronousZKClient(zk, exec)
 
   def asyncZookeeper: AsynchronousZookeeper = new AsynchronousZK(zk, exec)
 
@@ -426,7 +426,7 @@ private class BaseZK(zk: ZooKeeper, exec: ExecutionContext) extends Zookeeper {
   def close(): Unit = zk.close()
 }
 
-private class SynchronousZK(zk: ZooKeeper, exec: ExecutionContext) extends BaseZK(zk, exec) with SynchronousZookeeper {
+private class SynchronousZKClient(zk: ZooKeeper, exec: ExecutionContext) extends BaseZK(zk, exec) with SynchronousZookeeperClient {
   def create(path: String, data: Array[Byte], acl: Seq[ACL], disp: Disposition) = {
     zk.create(path, data, ACL.toZACL(acl), disp.mode)
   }
@@ -466,8 +466,8 @@ private class SynchronousZK(zk: ZooKeeper, exec: ExecutionContext) extends BaseZ
     Status(path, stat)
   }
 
-  def watch(fn: PartialFunction[Event, Unit]): SynchronousWatchableZookeeper = {
-    new SynchronousWatchableZK(zk, exec, fn)
+  def watch(fn: PartialFunction[Event, Unit]): SynchronousWatchableZookeeperClient = {
+    new SynchronousWatchableZKClient(zk, exec, fn)
   }
 
   def transact(ops: Seq[Operation]): Either[Seq[Problem], Seq[Result]] = {
@@ -499,8 +499,8 @@ private class SynchronousZK(zk: ZooKeeper, exec: ExecutionContext) extends BaseZ
   }
 }
 
-private class SynchronousWatchableZK(zk: ZooKeeper, exec: ExecutionContext, fn: PartialFunction[Event, Unit])
-      extends BaseZK(zk, exec) with SynchronousWatchableZookeeper {
+private class SynchronousWatchableZKClient(zk: ZooKeeper, exec: ExecutionContext, fn: PartialFunction[Event, Unit])
+      extends BaseZK(zk, exec) with SynchronousWatchableZookeeperClient {
   private[this] val watcher = new Watcher {
     def process(event: WatchedEvent) {
       val e = Event(event)
@@ -688,16 +688,16 @@ private object ExistsHandler {
 }
 
 /**
- * Constructs [[Zookeeper]] values.
+ * Constructs [[ZookeeperClient]] values.
  */
-object Zookeeper {
+object ZookeeperClient {
   /**
    * Constructs a new ZooKeeper client using the given configuration.
    *
    * @param config the client configuration
    * @return a client with the given `config`
    */
-  def apply(config: Configuration): Zookeeper = apply(config, null)
+  def apply(config: ConfigurationZookeeperClient): ZookeeperClient = apply(config, null)
 
   /**
    * Constructs a new ZooKeeper client using the given configuration and session credential.
@@ -706,7 +706,7 @@ object Zookeeper {
    * @param cred the session credentials
    * @return a client with the given `config` and `cred`
    */
-  def apply(config: Configuration, cred: Credential): Zookeeper = {
+  def apply(config: ConfigurationZookeeperClient, cred: Credential): ZookeeperClient = {
     val servers = ("" /: config.servers) {
       case (buf, addr) => (if (buf.isEmpty) buf else buf + ",") + addr.getHostName + ":" + addr.getPort
     }
@@ -750,23 +750,23 @@ object Zookeeper {
 }
 
 /**
- * Constructs [[SynchronousZookeeper]] values.
+ * Constructs [[SynchronousZookeeperClient]] values.
  *
  * This companion object is provided as a convenience and is equivalent to:
  * {{{
  * Zookeeper(...).sync
  * }}}
  *
- * @see [[Zookeeper]]
+ * @see [[ZookeeperClient]]
  */
-object SynchronousZookeeper {
+object SynchronousZookeeperClient {
   /**
    * Constructs a new synchronous ZooKeeper client using the given configuration.
    *
    * @param config the client configuration
    * @return a client with the given `config`
    */
-  def apply(config: Configuration): SynchronousZookeeper = Zookeeper(config).syncZookeeper
+  def apply(config: ConfigurationZookeeperClient): SynchronousZookeeperClient = ZookeeperClient(config).syncZookeeper
 
   /**
    * Constructs a new synchronous ZooKeeper client using the given configuration and session credential.
@@ -775,7 +775,7 @@ object SynchronousZookeeper {
    * @param cred the session credentials
    * @return a client with the given `config` and `cred`
    */
-  def apply(config: Configuration, cred: Credential): SynchronousZookeeper = Zookeeper(config, cred).syncZookeeper
+  def apply(config: ConfigurationZookeeperClient, cred: Credential): SynchronousZookeeperClient = ZookeeperClient(config, cred).syncZookeeper
 }
 
 /**
@@ -786,7 +786,7 @@ object SynchronousZookeeper {
  * Zookeeper(...).async
  * }}}
  *
- * @see [[Zookeeper]]
+ * @see [[ZookeeperClient]]
  */
 object AsynchronousZookeeper {
   /**
@@ -795,7 +795,7 @@ object AsynchronousZookeeper {
    * @param config the client configuration
    * @return a client with the given `config`
    */
-  def apply(config: Configuration): AsynchronousZookeeper = Zookeeper(config).asyncZookeeper
+  def apply(config: ConfigurationZookeeperClient): AsynchronousZookeeper = ZookeeperClient(config).asyncZookeeper
 
   /**
    * Constructs a new asynchronous ZooKeeper client using the given configuration and session credential.
@@ -804,5 +804,5 @@ object AsynchronousZookeeper {
    * @param cred the session credentials
    * @return a client with the given `config` and `cred`
    */
-  def apply(config: Configuration, cred: Credential): AsynchronousZookeeper = Zookeeper(config, cred).asyncZookeeper
+  def apply(config: ConfigurationZookeeperClient, cred: Credential): AsynchronousZookeeper = ZookeeperClient(config, cred).asyncZookeeper
 }

@@ -25,7 +25,7 @@ trait Session {
    * Returns the period of time after which the session is expired.
    * 
    * This value is ultimately decided by ZooKeeper, and therefore, may not be equal to the `timeout` specified in
-   * [[Configuration]].
+   * [[ConfigurationZookeeperClient]].
    * 
    * @return the period of time after which the session is expired
    */
