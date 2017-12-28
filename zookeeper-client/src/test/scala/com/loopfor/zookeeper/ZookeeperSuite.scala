@@ -22,16 +22,16 @@ import org.scalatest.fixture.FunSuite
 abstract class ZookeeperSuite extends FunSuite with BeforeAndAfterAll {
   type FixtureParam = Path
 
-  private val server: ZooKeeperServer = ServerFixture()
-  implicit val zooKeeper: ZookeeperClient = ZookeeperClientFixture(server.getClientPort)
+  private val server: ZooKeeperServer = ZooKeeperServerFixture()
+  implicit val zooKeeperClient = ZookeeperClientFixture(server.getClientPort)
 
   override protected def afterAll {
-    zooKeeper.close()
+    zooKeeperClient.close()
     server.shutdown()
   }
 
   override protected def withFixture(test: OneArgTest) = {
-    val root: String = zooKeeper.syncZookeeper.create("/test_", Array(), ACL.AnyoneAll, PersistentSequential)
+    val root: String = zooKeeperClient.syncZookeeper.create("/test_", Array(), ACL.AnyoneAll, PersistentSequential)
     super.withFixture(test.toNoArgTest(Path(root)))
   }
 }

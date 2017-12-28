@@ -20,7 +20,7 @@ import java.net.InetSocketAddress
 import java.util.UUID
 import org.apache.zookeeper.server.{NIOServerCnxnFactory, ZooKeeperServer}
 
-object ServerFixture {
+object ZooKeeperServerFixture {
   private val TMP_PATH = System getProperty "java.io.tmpdir"
   private val TICK_TIME = ZooKeeperServer.DEFAULT_TICK_TIME
   private val MAX_CONNECTIONS = 64

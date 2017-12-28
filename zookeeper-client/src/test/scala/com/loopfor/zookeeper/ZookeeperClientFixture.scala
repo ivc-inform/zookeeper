@@ -18,8 +18,13 @@ package com.loopfor.zookeeper
 import scala.language._
 
 object ZookeeperClientFixture {
-  def apply(port: Int): ZookeeperClient = {
-    val config = ConfigurationZookeeperClient(("localhost", port) :: Nil)
-    ZookeeperClient(config)
-  }
+    def apply(port: Int): ZookeeperClient = {
+        val config = ConfigurationZookeeperClient(("localhost", port) :: Nil).withWatcher(
+                (state: StateEvent, session: Session) ⇒ {
+                    println(state)
+                    println(session)
+                }
+        )
+        ZookeeperClient(config)
+    }
 }
