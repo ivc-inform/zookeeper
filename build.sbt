@@ -24,7 +24,7 @@ lazy val zookeeper = (project in file("."))
           licenses := Seq("Apache License, Version 2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")),
           publishTo := {
               val corporateRepo = "http://toucan.simplesys.lan/"
-              if (isSnapshot.value)
+              if (version.value.endsWith("-SNAPSHOT"))
                   Some("snapshots" at corporateRepo + "artifactory/libs-snapshot-local")
               else
                   Some("releases" at corporateRepo + "artifactory/libs-release-local")

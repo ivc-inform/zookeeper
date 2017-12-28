@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 import org.apache.zookeeper.KeeperException.Code
 import org.apache.zookeeper.data.{Stat, ACL ⇒ ZACL}
-import org.apache.zookeeper.{KeeperException ⇒ ZException, _}
+import org.apache.zookeeper.{KeeperException ⇒ ZKeeperException, _}
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
@@ -487,7 +487,7 @@ private class SynchronousZK(zk: ZooKeeper, exec: ExecutionContext) extends BaseZ
         Left(ops zip e.getResults.asScala map {
           case (op, result) =>
             val rc = result.asInstanceOf[OpResult.ErrorResult].getErr
-            val error = if (rc == 0) None else Some(ZException.create(Code.get(rc)))
+            val error = if (rc == 0) None else Some(ZKeeperException.create(Code.get(rc)))
             op match {
               case _op: CreateOperation => CreateProblem(_op, error)
               case _op: DeleteOperation => DeleteProblem(_op, error)
@@ -615,7 +615,7 @@ private object StringHandler {
     def processResult(rc: Int, path: String, context: Object, name: String) {
       (Code.get(rc): @unchecked) match {
         case Code.OK => p success name
-        case code => p failure ZException.create(code)
+        case code => p failure ZKeeperException.create(code)
       }
     }
   }
@@ -626,7 +626,7 @@ private object VoidHandler {
     def processResult(rc: Int, path: String, context: Object) {
       (Code.get(rc): @unchecked) match {
         case Code.OK => p success (())
-        case code => p failure ZException.create(code)
+        case code => p failure ZKeeperException.create(code)
       }
     }
   }
@@ -637,7 +637,7 @@ private object DataHandler {
     def processResult(rc: Int, path: String, context: Object, data: Array[Byte], stat: Stat) {
       (Code.get(rc): @unchecked) match {
         case Code.OK => p success (if (data == null) Array() else data, Status(path, stat))
-        case code => p failure ZException.create(code)
+        case code => p failure ZKeeperException.create(code)
       }
     }
   }
@@ -648,7 +648,7 @@ private object ChildrenHandler {
     def processResult(rc: Int, path: String, context: Object, children: java.util.List[String], stat: Stat) {
       (Code.get(rc): @unchecked) match {
         case Code.OK => p success (children.asScala.toList, Status(path, stat))
-        case code => p failure ZException.create(code)
+        case code => p failure ZKeeperException.create(code)
       }
     }
   }
@@ -659,7 +659,7 @@ private object ACLHandler {
     def processResult(rc: Int, path: String, context: Object, zacl: java.util.List[ZACL], stat: Stat) {
       (Code.get(rc): @unchecked) match {
         case Code.OK => p success (ACL(zacl), Status(path, stat))
-        case code => p failure ZException.create(code)
+        case code => p failure ZKeeperException.create(code)
       }
     }
   }
@@ -670,7 +670,7 @@ private object StatHandler {
     def processResult(rc: Int, path: String, context: Object, stat: Stat) {
       (Code.get(rc): @unchecked) match {
         case Code.OK => p success Status(path, stat)
-        case code => p failure ZException.create(code)
+        case code => p failure ZKeeperException.create(code)
       }
     }
   }
@@ -681,7 +681,7 @@ private object ExistsHandler {
     def processResult(rc: Int, path: String, context: Object, stat: Stat) {
       (Code.get(rc): @unchecked) match {
         case Code.OK => p success (if (stat == null) None else Some(Status(path, stat)))
-        case code => p failure ZException.create(code)
+        case code => p failure ZKeeperException.create(code)
       }
     }
   }

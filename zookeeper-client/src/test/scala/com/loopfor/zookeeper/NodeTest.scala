@@ -20,7 +20,6 @@ import scala.language._
 
 class NodeTest extends ZookeeperSuite {
   test("normalized path when constructing node") { root =>
-    val a: String = root
     val tests = Seq(
           ("", ""),
           ("/", "/"),
@@ -41,7 +40,8 @@ class NodeTest extends ZookeeperSuite {
           ("/foo/../../bar", "/bar"))
 
     tests foreach {
-      case (p, e) => assert(Node(p).path.path === e)
+      case (path, e) =>
+          assert(Node(path).nodePath.path === e)
     }
   }
 
@@ -73,11 +73,12 @@ class NodeTest extends ZookeeperSuite {
   test("create persistent node") { root =>
     val path = root resolve "foo"
     val node = Node(path).create(Array(), ACL.AnyoneAll, Persistent)
-    assert(node.path === path)
+    assert(node.nodePath === path)
   }
 
   test("set and get") { root =>
-    val node = Node(root resolve "foo").create(Array(), ACL.AnyoneAll, Persistent)
+    val res = root resolve "foo"
+    val node = Node(res).create(Array(), ACL.AnyoneAll, Persistent)
     val in = randomBytes()
     node.set(in, Some(0))
     val (out, status) = node.get()
