@@ -16,7 +16,7 @@ lazy val zookeeper = (project in file("."))
   )
   .settings(
       inThisBuild(Seq(
-          publishMavenStyle := true,
+          //publishMavenStyle := true,
           organization := "com.loopfor.zookeeper",
           version := "1.5-SNAPSHOT",
           description := "Scala API for ZooKeeper",
