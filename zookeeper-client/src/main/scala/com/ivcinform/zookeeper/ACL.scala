@@ -1,4 +1,4 @@
-package com.loopfor.zookeeper
+package com.ivcinform.zookeeper
 
 import org.apache.zookeeper.ZooDefs.{Ids, Perms}
 import org.apache.zookeeper.data.{ACL => ZACL}

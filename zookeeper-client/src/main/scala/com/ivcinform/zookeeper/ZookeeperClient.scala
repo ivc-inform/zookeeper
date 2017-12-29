@@ -1,5 +1,5 @@
 
-package com.loopfor.zookeeper
+package com.ivcinform.zookeeper
 
 import java.util.concurrent.atomic.AtomicReference
 

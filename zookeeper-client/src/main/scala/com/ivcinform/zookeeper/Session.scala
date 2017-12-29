@@ -1,5 +1,5 @@
 
-package com.loopfor.zookeeper
+package com.ivcinform.zookeeper
 
 import org.apache.zookeeper.ZooKeeper
 import scala.concurrent.duration._

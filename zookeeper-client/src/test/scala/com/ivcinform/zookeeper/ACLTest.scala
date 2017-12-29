@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.loopfor.zookeeper
+package com.ivcinform.zookeeper
 
-import com.loopfor.zookeeper.ACL._
+import com.ivcinform.zookeeper.ACL._
 import org.scalatest.FunSuite
 
 class ACLTest extends FunSuite {

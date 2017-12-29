@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.loopfor.zookeeper
+package com.ivcinform.zookeeper
 
 import org.scalatest.FunSuite
 import scala.language._

@@ -1,4 +1,4 @@
-package com.loopfor.zookeeper
+package com.ivcinform.zookeeper
 
 import org.apache.zookeeper.CreateMode
 import org.apache.zookeeper.CreateMode._

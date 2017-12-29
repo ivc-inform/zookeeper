@@ -1,10 +1,11 @@
-package com.loopfor.zookeeper
+package com.ivcinform.zookeeper
 
 import scala.language._
 
 object ZookeeperClientFixture {
     def apply(port: Int): ZookeeperClient = {
-        val config = ConfigurationZookeeperClient(("localhost", port) :: Nil).withWatcher(
+        val config = ConfigurationZookeeperClient(("localhost", port) :: Nil)
+          .withWatcher(
                 (state: StateEvent, session: Session) ⇒ {
                     println(s"state: $state")
                     println(s"session: $session")

@@ -1,4 +1,4 @@
-package com.loopfor.zookeeper
+package com.ivcinform.zookeeper
 
 import java.net.InetSocketAddress
 import scala.concurrent.ExecutionContext

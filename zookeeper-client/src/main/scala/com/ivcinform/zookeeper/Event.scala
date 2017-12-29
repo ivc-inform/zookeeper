@@ -1,4 +1,4 @@
-package com.loopfor.zookeeper
+package com.ivcinform.zookeeper
 
 import org.apache.zookeeper.WatchedEvent
 import org.apache.zookeeper.Watcher.Event.{EventType, KeeperState}

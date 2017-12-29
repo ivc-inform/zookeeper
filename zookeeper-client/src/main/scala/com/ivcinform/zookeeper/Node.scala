@@ -1,4 +1,4 @@
-package com.loopfor.zookeeper
+package com.ivcinform.zookeeper
 
 /**
   * Represents a ''node'' in ZooKeeper.

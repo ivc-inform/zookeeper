@@ -1,4 +1,4 @@
-package com.loopfor.zookeeper
+package com.ivcinform.zookeeper
 
 import java.net.{InetAddress, Inet4Address, UnknownHostException}
 import org.apache.zookeeper.ZooDefs.Ids
