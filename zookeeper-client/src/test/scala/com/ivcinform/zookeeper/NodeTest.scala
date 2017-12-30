@@ -77,7 +77,7 @@ class NodeTest extends ZookeeperSuite {
   }
 
   test("set and get") { root =>
-    val res = root resolve "foo"
+    val res: Path = root resolve "foo"
     val node = Node(res).create(Array(), ACL.AnyoneAll, Persistent)
     val in = randomBytes()
     node.set(in, Some(0))

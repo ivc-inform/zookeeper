@@ -470,7 +470,7 @@ private class SynchronousZKClient(zk: ZooKeeper, exec: ExecutionContext) extends
             }
             val results = zk.multi(_ops.asJava).asScala
             Right(ops zip results map {
-                case (op, result) => op match {
+                case (op, result) ⇒ op match {
                     case _op: CreateOperation => CreateResult(_op, result.asInstanceOf[OpResult.CreateResult].getPath)
                     case _op: DeleteOperation => DeleteResult(_op)
                     case _op: SetOperation => SetResult(_op, Status(_op.path, result.asInstanceOf[OpResult.SetDataResult].getStat))
