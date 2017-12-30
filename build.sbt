@@ -39,6 +39,8 @@ lazy val `zookeeper-client` = (project in file("zookeeper-client")).
       name := "zookeeper-client",
       libraryDependencies ++= Seq(
           "org.apache.zookeeper" % "zookeeper" % "3.4.11" exclude("jline", "jline"),
+          "com.mihnita" % "color-loggers" % "1.0.5",
+          "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
           "org.scalatest" %% "scalatest" % "3.0.4" % Test
       )
   )
