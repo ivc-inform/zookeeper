@@ -41,7 +41,9 @@ package object zookeeper extends LazyLogging {
       * @return an `InetSocketAddress` composed from the given `addr` tuple
       */
     implicit def tupleToInetSocketAddress(addr: (String, Int)): InetSocketAddress = new InetSocketAddress(addr._1, addr._2)
+
     implicit def tuplesToInetSocketAddress(addrs: (String, Int)*): Seq[InetSocketAddress] = addrs.map(tupleToInetSocketAddress)
+    
     implicit def strToInetSocketAddress(connectString: String): Seq[InetSocketAddress] = {
         val addrs = connectString.split(",").map {
             item ⇒
