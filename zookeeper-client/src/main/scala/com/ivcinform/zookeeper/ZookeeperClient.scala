@@ -1,8 +1,10 @@
 
 package com.ivcinform.zookeeper
 
+import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicReference
 
+import com.typesafe.scalalogging.LazyLogging
 import org.apache.zookeeper.KeeperException.Code
 import org.apache.zookeeper.data.{Stat, ACL ⇒ ZACL}
 import org.apache.zookeeper.{KeeperException ⇒ ZKeeperException, _}
@@ -683,7 +685,29 @@ private object ExistsHandler {
 /**
   * Constructs [[ZookeeperClient]] values.
   */
-object ZookeeperClient {
+object ZookeeperClient extends LazyLogging {
+    def strToInetSocketAddress(connectString: String): Seq[InetSocketAddress] = {
+        val addrs = connectString.split(",").map {
+            item ⇒
+                val items = item.split(":")
+                if (items.length == 2) {
+                    val port = try {
+                        items(1).toInt
+                    } catch {
+                        case e: Throwable ⇒
+                            logger error(e.getMessage, e)
+                            2181
+                    }
+                    Some(items(0).trim -> port)
+                }
+                else if (items.length == 1)
+                    Some(items.head.trim -> 2181)
+                else
+                    None
+        }.filter(_.isDefined).map(_.get)
+        tuplesToInetSocketAddress(addrs: _*)
+    }
+
     /**
       * Constructs a new ZooKeeper client using the given configuration.
       *

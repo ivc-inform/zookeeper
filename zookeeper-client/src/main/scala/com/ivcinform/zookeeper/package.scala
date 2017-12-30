@@ -13,7 +13,7 @@ import scala.language._
 /**
   * A Scala API for ZooKeeper.
   */
-package object zookeeper extends LazyLogging {
+package object zookeeper{
     type KeeperException = org.apache.zookeeper.KeeperException
     type APIErrorException = KeeperException.APIErrorException
     type AuthFailedException = KeeperException.AuthFailedException
@@ -46,25 +46,4 @@ package object zookeeper extends LazyLogging {
 
     implicit def tuplesToInetSocketAddress(addrs: (String, Int)*): Seq[InetSocketAddress] = addrs.map(tupleToInetSocketAddress)
 
-    def strToInetSocketAddress(connectString: String): Seq[InetSocketAddress] = {
-        val addrs = connectString.split(",").map {
-            item ⇒
-                val items = item.split(":")
-                if (items.length == 2) {
-                    val port = try {
-                        items(1).toInt
-                    } catch {
-                        case e: Throwable ⇒
-                            logger error(e.getMessage, e)
-                            2181
-                    }
-                    Some(items(0).trim -> port)
-                }
-                else if (items.length == 1)
-                    Some(items.head.trim -> 2181)
-                else
-                    None
-        }.filter(_.isDefined).map(_.get)
-        tuplesToInetSocketAddress(addrs: _*)
-    }
 }
