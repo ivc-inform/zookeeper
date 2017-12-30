@@ -68,7 +68,7 @@ trait Node {
       * @param version a `Some` containing the expected version of the node or `None` if a version match is not required
       * @see [[SynchronousZookeeperClient.delete]] for further details
       */
-    def delete(version: Option[Int])
+    def delete(version: Option[Int] = None)
 
     /**
       * Returns the data and status of this node.
