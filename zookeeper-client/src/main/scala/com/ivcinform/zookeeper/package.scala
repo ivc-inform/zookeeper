@@ -4,6 +4,8 @@ package com.ivcinform
 import java.net.InetSocketAddress
 
 import com.typesafe.scalalogging.LazyLogging
+
+//import com.typesafe.scalalogging.LazyLogging
 import org.apache.zookeeper.KeeperException
 
 import scala.language._
@@ -43,8 +45,8 @@ package object zookeeper extends LazyLogging {
     implicit def tupleToInetSocketAddress(addr: (String, Int)): InetSocketAddress = new InetSocketAddress(addr._1, addr._2)
 
     implicit def tuplesToInetSocketAddress(addrs: (String, Int)*): Seq[InetSocketAddress] = addrs.map(tupleToInetSocketAddress)
-    
-    implicit def strToInetSocketAddress(connectString: String): Seq[InetSocketAddress] = {
+
+    def strToInetSocketAddress(connectString: String): Seq[InetSocketAddress] = {
         val addrs = connectString.split(",").map {
             item ⇒
                 val items = item.split(":")
